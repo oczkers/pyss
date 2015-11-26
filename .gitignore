@@ -1,0 +1,7 @@
+docs/_build
+*.pyc
+build/
+dist/
+pyss.egg-info/
+test.py
+screenlog.0
