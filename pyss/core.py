@@ -15,6 +15,7 @@ class Core(object):
     # TODO: add getManifest
     # TODO: getManifest in init
     # TODO: detect url change in getManifest (balancer sends us to different host)
+    # TODO: add specific user-agents and settings (for netia tv for example)
     def __init__(self):
         self.r = requests.Session()
         self.r.headers = headers
