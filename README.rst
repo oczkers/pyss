@@ -23,7 +23,7 @@ Init
 
 .. code-block:: python
 
-ss = pyss.Core()
+    ss = pyss.Core()
 
 
 
