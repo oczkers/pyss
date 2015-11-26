@@ -1,4 +1,4 @@
-fut
+pyss
 =====
 
 .. image:: https://travis-ci.org/oczkers/pyss.png?branch=master
@@ -20,7 +20,11 @@ Usage
 
 Init
 `````````````
+
+.. code-block:: python
+
 ss = pyss.Core()
+
 
 
 to be continued ;-)
