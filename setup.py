@@ -68,7 +68,7 @@ setup(
     ),
     # entry_points={
     #     'console_scripts': [
-    #         'fut = fut.cli:main',
+    #         'pyss = pyss.cli:main',
     #     ]
     # }
 )

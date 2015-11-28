@@ -12,10 +12,6 @@ base_url = 'http://host.tld/channel.smil'  # get this from manifest url
 
 
 class Core(object):
-    # TODO: add getManifest
-    # TODO: getManifest in init
-    # TODO: detect url change in getManifest (balancer sends us to different host)
-    # TODO: add specific user-agents and settings (for netia tv for example)
     def __init__(self, user_agent=headers['User-Agent']):
         self.r = requests.Session()
         self.r.headers['User-Agent'] = user_agent
@@ -61,6 +57,23 @@ class Core(object):
             streams[i['@Type']]['chunkd'] = i['c'][-1]['@d']
         return streams
 
+    def getManifest(self, url):
+        """Retrieves manifest, returns parsed (streams)."""
+        if not url.lower().endswitch('/manifest'):
+            if url.endswith('/'):  # is it necessary?
+                url = url[:-1]
+        rc = self.r.get(url + '/Manifest')
+        self.base_url = rc.url[:-9]  # cut '/Manifest'
+        return self.parseManifest(rc.content)
+
+    def getStreams(self, streams):
+        """Retrieves streams (first audio and first video)"""
+        # TODO: detect best quality
+        # todo: ability to choose quality
+        for stream in streams.values():
+            filename = stream['url'].replace('{bitrate}', stream['quality'][0]['bitrate'])
+            self.getChunks(stream['chunks'], filename)
+
     def getChunks(self, chunks, filename):
         """Downloads all chunks."""
         # TODO: return chunk instead of saving as a file.
@@ -69,14 +82,6 @@ class Core(object):
             url = base_url + '/' + f
             with open(f, 'wb') as f:
                 f.write(self.r.get(url).content)
-
-    def getStreams(self, streams):
-        """Retrieves streams (first audio and first video)."""
-        # TODO: detect best quality
-        # todo: ability to choose quality
-        for stream in streams.values():
-            filename = stream['url'].replace('{bitrate}', stream['quality'][0]['bitrate'])
-            self.getChunks(stream['chunks'], filename)
 
     def live(self, streams):
         """Retrieves live chunks in while loop."""

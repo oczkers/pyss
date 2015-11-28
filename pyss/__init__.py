@@ -27,3 +27,4 @@ __copyright__ = 'Copyright 2015 Piotr Staroszczyk'
 
 
 from .core import Core
+from .api import *
