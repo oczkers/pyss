@@ -16,9 +16,9 @@ class Core(object):
     # TODO: getManifest in init
     # TODO: detect url change in getManifest (balancer sends us to different host)
     # TODO: add specific user-agents and settings (for netia tv for example)
-    def __init__(self):
+    def __init__(self, user_agent=headers['User-Agent']):
         self.r = requests.Session()
-        self.r.headers = headers
+        self.r.headers['User-Agent'] = user_agent
 
     def parseManifest(self, manifest):
         """Parses manifest."""
