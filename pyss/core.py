@@ -86,7 +86,7 @@ class Core(object):
         """Retrieves live chunks in while loop."""
         # TODO: move chunk sequence detection to parseManifest
         # TODO: throw exception on 404 error (probably wrong sleep time)
-        # TODO: be a generator instead of saving files
+        # TODO: be a generator instead of saving files, return (video, audio)
         # TODO: ability to manipulate loop lenght (for example finish after 30min)
         # TODO: async to avoid 404
         # TODO: write offline manifest

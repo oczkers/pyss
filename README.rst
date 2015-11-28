@@ -1,5 +1,5 @@
 pyss
-=====
+====
 
 .. image:: https://travis-ci.org/oczkers/pyss.png?branch=master
         :target: https://travis-ci.org/oczkers/pyss
