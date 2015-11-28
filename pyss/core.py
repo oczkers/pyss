@@ -69,6 +69,7 @@ class Core(object):
     def getStreams(self, streams):
         """Retrieves streams (first audio and first video)"""
         # TODO: detect best quality
+        # TODO: detect live
         # todo: ability to choose quality
         for stream in streams.values():
             filename = stream['url'].replace('{bitrate}', stream['quality'][0]['bitrate'])
@@ -83,7 +84,7 @@ class Core(object):
             with open(f, 'wb') as f:
                 f.write(self.r.get(url).content)
 
-    def live(self, streams):
+    def getStreamsLive(self, streams):
         """Retrieves live chunks in while loop."""
         # TODO: move chunk sequence detection to parseManifest
         # TODO: throw exception on 404 error (probably wrong sleep time)
