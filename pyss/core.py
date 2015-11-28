@@ -8,8 +8,6 @@ import time
 import sys
 from .config import headers
 
-base_url = 'http://host.tld/channel.smil'  # get this from manifest url
-
 
 class Core(object):
     def __init__(self, user_agent=headers['User-Agent']):
@@ -80,11 +78,11 @@ class Core(object):
         # TODO: return chunk instead of saving as a file.
         for c in chunks:
             f = filename.replace('{start time}', c)
-            url = base_url + '/' + f
+            url = self.base_url + '/' + f
             with open(f, 'wb') as f:
                 f.write(self.r.get(url).content)
 
-    def getStreamsLive(self, streams):
+    def getStreamsLive(self, streams, interval=1):
         """Retrieves live chunks in while loop."""
         # TODO: move chunk sequence detection to parseManifest
         # TODO: throw exception on 404 error (probably wrong sleep time)
@@ -108,7 +106,7 @@ class Core(object):
                 # video
                 filename = streams['video']['url'].replace('{bitrate}', streams['video']['quality'][0]['bitrate']).replace('{start time}', chunk_video)
                 print filename
-                url = base_url + '/' + filename
+                url = self.base_url + '/' + filename
                 with open(filename, 'wb') as f:
                     rc = self.r.get(url)
                     if rc.status_code != 200: sys.exit(rc.status_code)
@@ -117,9 +115,9 @@ class Core(object):
                 # ... 6 5 5 6 5 5 6 5 5 ...
                 filename = streams['audio']['url'].replace('{bitrate}', streams['audio']['quality'][0]['bitrate']).replace('{start time}', chunk_audio)
                 print filename
-                url = base_url + '/' + filename
+                url = self.base_url + '/' + filename
                 with open(filename, 'wb') as f:
                     rc = self.r.get(url)
                     if rc.status_code != 200: sys.exit(rc.status_code)
                     f.write(rc.content)
-                time.sleep(1)
+                time.sleep(interval)
