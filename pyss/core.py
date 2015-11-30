@@ -18,6 +18,7 @@ class Core(object):
         """Parses manifest."""
         # TODO: detect sequence (different chunk size [live])
         # TODO: full sequence
+        # TODO: add type (audio/video) to stream dict
         manifest = xmltodict.parse(manifest)
         streams = {
             'audio': {'quality': [],
@@ -31,7 +32,7 @@ class Core(object):
         }
         for i in manifest['SmoothStreamingMedia']['StreamIndex']:
             streams[i['@Type']]['url'] = i['@Url']
-            if i['@QualityLevels'] == '1':
+            if i['@QualityLevels'] == '1':  # i need a list to operate on
                 i['QualityLevel'] = [i['QualityLevel']]
             for q in i['QualityLevel']:
                 stream = {
@@ -39,20 +40,28 @@ class Core(object):
                     'fourcc': q['@FourCC'],
                     'codecprivatedata': q['@CodecPrivateData']
                 }
-                if '@MaxWidth' in q:  # video
+                if i['@Type'] == 'video':
                     stream['index'] = q['@Index']
                     stream['width'] = q['@MaxWidth']  # DisplayWidth?
                     stream['height'] = q['@MaxHeight']  # DisplayHeight?
-                elif '@SamplingRate' in q:  # audio
+                elif i['@Type'] == 'audio':
                     stream['samplingrate'] = q['@SamplingRate']
                     stream['channels'] = q['@Channels']
                     stream['bitspersample'] = q['@BitsPerSample']
                     stream['packetsize'] = q['@PacketSize']
                     stream['audiotag'] = q['@AudioTag']
                 streams[i['@Type']]['quality'].append(stream)
+            for n in enumerate(i['c'] - 1):
+                chunk_time = i['c'][n + 1] - i['c'][n]
+                streams[i['@Type']]['chunks'].append((i['c'][n], chunk_time))
+            '''
             for c in i['c']:
                 streams[i['@Type']]['chunks'].append(c['@t'])
-            streams[i['@Type']]['chunkd'] = i['c'][-1]['@d']
+            '''
+            # TODO: calulcate last chunk time (and add next one if @d is present)
+            # if '@d' in i['c'][-1]:  # calculate last chunk time
+            #     i['c'].append(i['c'][-1] + i['c'][-1]['@d'])
+            streams[i['@Type']]['chunkd'] = i['c'][-1]['@d']  # chunkd
         return streams
 
     def getManifest(self, url):
