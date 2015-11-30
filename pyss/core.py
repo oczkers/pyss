@@ -57,7 +57,7 @@ class Core(object):
 
     def getManifest(self, url):
         """Retrieves manifest, returns parsed (streams)."""
-        if not url.lower().endswitch('/manifest'):
+        if not url.lower().endswith('/manifest'):
             if url.endswith('/'):  # is it necessary?
                 url = url[:-1]
         rc = self.r.get(url + '/Manifest')
