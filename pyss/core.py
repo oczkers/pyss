@@ -51,9 +51,9 @@ class Core(object):
                     stream['packetsize'] = q['@PacketSize']
                     stream['audiotag'] = q['@AudioTag']
                 streams[i['@Type']]['quality'].append(stream)
-            for n in enumerate(i['c'] - 1):
-                chunk_time = i['c'][n + 1] - i['c'][n]
-                streams[i['@Type']]['chunks'].append((i['c'][n], chunk_time))
+            for n in enumerate(len(i['c']) - 1):
+                chunk_time = int(i['c'][n + 1]) - int(i['c'][n])
+                streams[i['@Type']]['chunks'].append((int(i['c'][n]), chunk_time))
             '''
             for c in i['c']:
                 streams[i['@Type']]['chunks'].append(c['@t'])
