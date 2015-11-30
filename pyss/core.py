@@ -16,6 +16,8 @@ class Core(object):
 
     def parseManifest(self, manifest):
         """Parses manifest."""
+        # TODO: move out of Core class
+        # TODO: refactor
         # TODO: detect sequence (different chunk size [live])
         # TODO: full sequence
         # TODO: add type (audio/video) to stream dict
@@ -23,12 +25,10 @@ class Core(object):
         streams = {
             'audio': {'quality': [],
                       'chunks': [],
-                      'url': None,
-                      'chunkd': 0},
+                      'url': None},
             'video': {'quality': [],
                       'chunks': [],
-                      'url': None,
-                      'chunkd': 0},
+                      'url': None},
         }
         for i in manifest['SmoothStreamingMedia']['StreamIndex']:
             streams[i['@Type']]['url'] = i['@Url']
@@ -51,17 +51,20 @@ class Core(object):
                     stream['packetsize'] = q['@PacketSize']
                     stream['audiotag'] = q['@AudioTag']
                 streams[i['@Type']]['quality'].append(stream)
-            for n in enumerate(len(i['c']) - 1):
-                chunk_time = int(i['c'][n + 1]) - int(i['c'][n])
-                streams[i['@Type']]['chunks'].append((int(i['c'][n]), chunk_time))
-            '''
-            for c in i['c']:
-                streams[i['@Type']]['chunks'].append(c['@t'])
-            '''
+            # calculate chunks lenghts
+            for n in range(len(i['c']) - 1):
+                chunk_lenght = int(i['c'][n + 1]['@t']) - int(i['c'][n]['@t'])
+                streams[i['@Type']]['chunks'].append((int(i['c'][n]['@t']), chunk_lenght))
             # TODO: calulcate last chunk time (and add next one if @d is present)
-            # if '@d' in i['c'][-1]:  # calculate last chunk time
-            #     i['c'].append(i['c'][-1] + i['c'][-1]['@d'])
-            streams[i['@Type']]['chunkd'] = i['c'][-1]['@d']  # chunkd
+            # calculate last chunk lenght
+            if '@d' in i['c'][-1]:
+                chunk_last = int(i['c'][-1]['@t']) + int(i['c'][-1]['@d'])
+                chunk_lenght = chunk_last - int(i['c'][-1]['@t'])
+                streams[i['@Type']]['chunks'].append((int(i['c'][-1]['@t']), chunk_lenght))
+            else:
+                chunk_last = int(i['c'][-1]['@t'])
+            chunk_lenght = streams[i['@Type']]['chunks'][-1][1]  # blind guess it's the same as before  # TODO: calculate this
+            streams[i['@Type']]['chunks'].append((chunk_last, chunk_lenght))
         return streams
 
     def getManifest(self, url):
