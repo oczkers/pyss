@@ -64,23 +64,26 @@ class Core(object):
         self.base_url = rc.url[:-9]  # cut '/Manifest'
         return self.parseManifest(rc.content)
 
+    def getChunk(self, stream_url, chunk_time):
+        """Returns chunk content."""
+        chunk_url = stream_url.replace('{start time}', chunk_time)
+        return self.r.get(chunk_url).content
+
+    def getStream(self, stream):
+        """Yields all chunks from given stream."""
+        # TODO: detect best quality
+        # TODO: detect live
+        # todo: ability to choose quality
+        stream_url = stream['url'].replace('{bitrate}', stream['quality'][0]['bitrate'])
+        for chunk_time in stream['chunks']:
+            yield self.getChunk(stream_url, chunk_time)
+
     def getStreams(self, streams):
         """Retrieves streams (first audio and first video)"""
         # TODO: detect best quality
         # TODO: detect live
         # todo: ability to choose quality
-        for stream in streams.values():
-            filename = stream['url'].replace('{bitrate}', stream['quality'][0]['bitrate'])
-            self.getChunks(stream['chunks'], filename)
-
-    def getChunks(self, chunks, filename):
-        """Downloads all chunks."""
-        # TODO: return chunk instead of saving as a file.
-        for c in chunks:
-            f = filename.replace('{start time}', c)
-            url = self.base_url + '/' + f
-            with open(f, 'wb') as f:
-                f.write(self.r.get(url).content)
+        pass
 
     def getStreamsLive(self, streams, interval=1):
         """Retrieves live chunks in while loop."""
