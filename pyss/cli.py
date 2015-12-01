@@ -19,6 +19,10 @@ from . import __version__, download
 from .config import headers
 
 
+def downloadToFile():
+    pass
+
+
 def main():
     # TODO: default user-agent string in docopt.
     args = docopt(__doc__, version=__version__)

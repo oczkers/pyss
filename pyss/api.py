@@ -9,7 +9,7 @@ def download(url, user_agent=headers['User-Agent']):
     # TODO: ability to set quality, time
     c = Core(user_agent)
     streams = c.getManifest(url)
-    c.getStreams(streams)  # work in progress
+    return c.getStreams(streams)  # returns generator
 
 
 # todo: play?
