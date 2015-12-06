@@ -10,9 +10,9 @@ def download(url, dest='.', user_agent=headers['User-Agent']):
     c = Core(user_agent)
     streams = c.getManifest(url)
     if c.live:
-        print 'Downloading live stream...'
+        print('Downloading live stream...')
     else:
-        print 'Downloading [n] chunks...'
+        print('Downloading [n] chunks...')
     n = 1
     for v, a in c.getStreams(streams):
         with open('%s/video/%s' % (dest, n), 'wb') as fv:

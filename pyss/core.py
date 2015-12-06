@@ -6,7 +6,8 @@ import xmltodict
 # import subprocess
 import time
 import sys
-from itertools import izip
+if sys.version_info[0] == 2:
+    from itertools import izip as zip
 try:
     from lxml import etree
 except ImportError:
@@ -21,6 +22,7 @@ class Manifest(dict):
 
     @property
     def xml(self):
+        # http://lxml.de/tutorial.html
         x = etree.Element(  # TODO: calculate duration
             'SmoothStreamingMedia', MajorVersion='2', MinorVersion='1',
             Duration='0', Timescale=str(self.timescale),
@@ -121,7 +123,7 @@ class Core(object):
         rc = self.r.get(chunk_url)
         if rc.status_code != 200:
             sys.exit(rc.status_code)
-        # print rc.status_code  # DEBUG
+        # print(rc.status_code)  # DEBUG
         return rc.content
 
     def getStream(self, stream):
@@ -144,5 +146,5 @@ class Core(object):
         # TODO: detect best quality
         # TODO: detect live
         # todo: ability to choose quality
-        for i in izip(self.getStream(streams['video']), self.getStream(streams['audio'])):
+        for i in zip(self.getStream(streams['video']), self.getStream(streams['audio'])):
             yield i
