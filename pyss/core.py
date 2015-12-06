@@ -7,13 +7,36 @@ import xmltodict
 import time
 import sys
 from itertools import izip
+try:
+    from lxml import etree
+except ImportError:
+    from xml.etree import cElementTree as etree
 from .config import headers
+
+
+class Manifest(dict):
+    def __init__(self):
+        self.timescale = 10000000
+        pass
+
+    @property
+    def xml(self):
+        x = etree.Element(  # TODO: calculate duration
+            'SmoothStreamingMedia', MajorVersion='2', MinorVersion='1',
+            Duration='0', Timescale=str(self.timescale),
+            LookAheadFragmentCount='2', DVRWindowLenght='0', IsLive='False'
+        )
+        return etree.tostring(x, xml_declaration=True, encoding='utf-8')
+
+    def addStream(self, stream):
+        pass
 
 
 class Core(object):
     def __init__(self, user_agent=headers['User-Agent']):
         self.r = requests.Session()
         self.r.headers['User-Agent'] = user_agent
+        self.live = False  # it shouldn't be this way
 
     def __calculateSequence(self, manifest_chunks):
         """Calculates sequence."""
@@ -32,6 +55,7 @@ class Core(object):
         for c, l in zip(manifest_chunks, sequence):
             yield (long(c['@t']), l)
         if '@d' in manifest_chunks[-1]:  # it's live stream (or at least we don't know how long it is)
+            self.live = True
             chunk_last = long(manifest_chunks[-1]['@t'])
             while True:
                 for l in range(len(sequence)):
@@ -41,7 +65,7 @@ class Core(object):
 
     def parseManifest(self, manifest):
         """Parses manifest."""
-        # TODO: move out of Core class
+        # TODO: move out of Core class?
         # TODO: refactor
         # TODO: return object (yield chunks [with content])?
         # TODO: detect sequence (different chunk size [live])
