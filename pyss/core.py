@@ -13,6 +13,7 @@ try:
 except ImportError:
     from xml.etree import cElementTree as etree
 from .config import headers
+from .exceptions import ConnectionError
 
 
 class Manifest(dict):
@@ -124,7 +125,7 @@ class Core(object):
         chunk_url = self.base_url + '/' + chunk_path
         rc = self.r.get(chunk_url)
         if rc.status_code != 200:
-            sys.exit(rc.status_code)
+            raise ConnectionError(rc.status_code, rc.reason)
         # print(rc.status_code)  # DEBUG
         return {'id': chunk_time, 'path': chunk_path, 'content': rc.content}
 
