@@ -51,6 +51,7 @@ class Core(object):
 
     def __manifestChunks__(self, manifest_chunks, interval=1):
         """Helper for parseManifest."""
+        # TODO: adjust interval based on real time
         # TODO: ability to set time (based on lenght) instead of while True
         # calculate sequence
         sequence = self.__calculateSequence(manifest_chunks)
@@ -119,12 +120,13 @@ class Core(object):
     def getChunk(self, stream_url, chunk_time):
         """Returns chunk content."""
         # TODO: throw exception on 404 error (probably wrong sleep time)
-        chunk_url = self.base_url + '/' + stream_url.replace('{start time}', str(chunk_time))
+        chunk_path = stream_url.replace('{start time}', str(chunk_time))
+        chunk_url = self.base_url + '/' + chunk_path
         rc = self.r.get(chunk_url)
         if rc.status_code != 200:
             sys.exit(rc.status_code)
         # print(rc.status_code)  # DEBUG
-        return rc.content
+        return {'id': chunk_time, 'path': chunk_path, 'content': rc.content}
 
     def getStream(self, stream):
         """Yields all chunks from given stream."""
