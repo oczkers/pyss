@@ -50,10 +50,9 @@ class Core(object):
         sequence.append(long(manifest_chunks[-1]['@d']))
         return sequence
 
-    def __manifestChunks__(self, manifest_chunks, interval=1):
+    def __manifestChunks__(self, manifest_chunks, interval=2):
         """Helper for parseManifest."""
-        # TODO: adjust interval based on real time
-        # TODO: ability to set time (based on lenght) instead of while True
+        # TODO: adjust interval based on chunk time/sequence instead of real time
         # calculate sequence
         sequence = self.__calculateSequence(manifest_chunks)
         for c, l in zip(manifest_chunks, sequence):
@@ -61,9 +60,14 @@ class Core(object):
         if '@d' in manifest_chunks[-1]:  # it's live stream (or at least we don't know how long it is)
             self.live = True
             chunk_last = long(manifest_chunks[-1]['@t'])
+            chunk_time = time.time()
             while True:
                 for l in range(len(sequence)):
-                    time.sleep(interval)
+                    chunk_time += interval
+                    chunk_interval = chunk_time - time.time()
+                    if chunk_interval < 0:
+                        print('WARNING: i am to slow (interval is bigger than %s)' % interval)
+                    time.sleep(max(0, chunk_interval))
                     chunk_last = chunk_last + sequence[l - 1]
                     yield (chunk_last, sequence[l])
 
@@ -72,8 +76,6 @@ class Core(object):
         # TODO: move out of Core class?
         # TODO: refactor
         # TODO: return object (yield chunks [with content])?
-        # TODO: detect sequence (different chunk size [live])
-        # TODO: full sequence
         # TODO: add type (audio/video) to stream dict
         manifest = xmltodict.parse(manifest)
         streams = {
@@ -120,7 +122,6 @@ class Core(object):
 
     def getChunk(self, stream_url, chunk_time):
         """Returns chunk content."""
-        # TODO: throw exception on 404 error (probably wrong sleep time)
         chunk_path = stream_url.replace('{start time}', str(chunk_time))
         chunk_url = self.base_url + '/' + chunk_path
         rc = self.r.get(chunk_url)
@@ -132,9 +133,7 @@ class Core(object):
     def getStream(self, stream, duration=float('inf')):
         """Yields all chunks from given stream."""
         # TODO: add drm support (rightsmanager.asmx) ?
-        # TODO: ability to manipulate loop lenght (for example finish after 30min)
         # TODO: detect best quality
-        # TODO: detect live
         # todo: ability to choose quality
         time_end = time.time() + duration
         stream_url = stream['url'].replace('{bitrate}', stream['quality'][0]['bitrate'])
@@ -147,10 +146,9 @@ class Core(object):
 
     def getStreams(self, streams, duration=float('inf')):
         """Retrieves streams (first audio and first video)"""
+        # TODO: multithread
         # TODO: write offline manifest
-        # TODO: ability to manipulate loop lenght (for example finish after 30min)
         # TODO: detect best quality
-        # TODO: detect live
         # todo: ability to choose quality
         for i in zip(self.getStream(streams['video'], duration=duration), self.getStream(streams['audio'], duration=duration)):
             yield i
