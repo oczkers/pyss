@@ -128,25 +128,28 @@ class Core(object):
         # print(rc.status_code)  # DEBUG
         return {'id': chunk_time, 'path': chunk_path, 'content': rc.content}
 
-    def getStream(self, stream):
+    def getStream(self, stream, duration=float('inf')):
         """Yields all chunks from given stream."""
         # TODO: add drm support (rightsmanager.asmx) ?
         # TODO: ability to manipulate loop lenght (for example finish after 30min)
         # TODO: detect best quality
         # TODO: detect live
         # todo: ability to choose quality
+        time_end = time.time() + duration
         stream_url = stream['url'].replace('{bitrate}', stream['quality'][0]['bitrate'])
         for chunk in stream['chunks']:
+            if time.time() > time_end:
+                break
             # return chunk[0]
             yield self.getChunk(stream_url, chunk[0])
             # return self.getChunk(stream_url, chunk[0])
 
-    def getStreams(self, streams):
+    def getStreams(self, streams, duration=float('inf')):
         """Retrieves streams (first audio and first video)"""
         # TODO: write offline manifest
         # TODO: ability to manipulate loop lenght (for example finish after 30min)
         # TODO: detect best quality
         # TODO: detect live
         # todo: ability to choose quality
-        for i in zip(self.getStream(streams['video']), self.getStream(streams['audio'])):
+        for i in zip(self.getStream(streams['video'], duration=duration), self.getStream(streams['audio'], duration=duration)):
             yield i
