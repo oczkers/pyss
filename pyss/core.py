@@ -50,7 +50,7 @@ class Core(object):
         sequence.append(long(manifest_chunks[-1]['@d']))
         return sequence
 
-    def __manifestChunks__(self, manifest_chunks, interval=2):
+    def __manifestChunks__(self, manifest_chunks):
         """Helper for parseManifest."""
         # TODO: adjust interval based on chunk time/sequence instead of real time
         # calculate sequence
@@ -60,14 +60,8 @@ class Core(object):
         if '@d' in manifest_chunks[-1]:  # it's live stream (or at least we don't know how long it is)
             self.live = True
             chunk_last = long(manifest_chunks[-1]['@t'])
-            chunk_time = time.time()
             while True:
                 for l in range(len(sequence)):
-                    chunk_time += interval
-                    chunk_interval = chunk_time - time.time()
-                    if chunk_interval < 0:
-                        print('WARNING: i am to slow (interval is bigger than %s)' % interval)
-                    time.sleep(max(0, chunk_interval))
                     chunk_last = chunk_last + sequence[l - 1]
                     yield (chunk_last, sequence[l])
 
@@ -130,7 +124,7 @@ class Core(object):
         # print(rc.status_code)  # DEBUG
         return {'id': chunk_time, 'path': chunk_path, 'content': rc.content}
 
-    def getStream(self, stream, duration=float('inf')):
+    def getStream(self, stream, duration=float('inf'), interval=1):
         """Yields all chunks from given stream."""
         # TODO: add drm support (rightsmanager.asmx) ?
         # TODO: detect best quality
@@ -140,15 +134,14 @@ class Core(object):
         for chunk in stream['chunks']:
             if time.time() > time_end:
                 break
-            # return chunk[0]
+            time.sleep(interval)
             yield self.getChunk(stream_url, chunk[0])
-            # return self.getChunk(stream_url, chunk[0])
 
-    def getStreams(self, streams, duration=float('inf')):
+    def getStreams(self, streams, duration=float('inf'), interval=1):
         """Retrieves streams (first audio and first video)"""
         # TODO: multithread
         # TODO: write offline manifest
         # TODO: detect best quality
         # todo: ability to choose quality
-        for i in zip(self.getStream(streams['video'], duration=duration), self.getStream(streams['audio'], duration=duration)):
+        for i in zip(self.getStream(streams['video'], duration=duration, interval=interval), self.getStream(streams['audio'], duration=duration, interval=interval)):
             yield i
