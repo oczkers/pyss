@@ -42,7 +42,7 @@ class Core(object):
         self.live = False  # it shouldn't be this way
 
     def __calculateSequence(self, manifest_chunks):
-        """Calculates sequence."""
+        """Calculate sequence."""
         sequence = []
         for n in range(len(manifest_chunks) - 1):
             lenght = long(manifest_chunks[n + 1]['@t']) - long(manifest_chunks[n]['@t'])
@@ -66,7 +66,7 @@ class Core(object):
                     yield (chunk_last, sequence[l])
 
     def parseManifest(self, manifest):
-        """Parses manifest."""
+        """Parse manifest."""
         # TODO: move out of Core class?
         # TODO: refactor
         # TODO: return object (yield chunks [with content])?
@@ -106,7 +106,7 @@ class Core(object):
         return streams
 
     def getManifest(self, url):
-        """Retrieves manifest, returns parsed (streams)."""
+        """Retrieve manifest, returns parsed (streams)."""
         if not url.lower().endswith('/manifest'):
             if url.endswith('/'):  # is it necessary?
                 url = url[:-1]
@@ -115,7 +115,7 @@ class Core(object):
         return self.parseManifest(rc.content)
 
     def getChunk(self, stream_url, chunk_time):
-        """Returns chunk content."""
+        """Return chunk content."""
         chunk_path = stream_url.replace('{start time}', str(chunk_time))
         chunk_url = self.base_url + '/' + chunk_path
         rc = self.r.get(chunk_url)
@@ -125,7 +125,7 @@ class Core(object):
         return {'id': chunk_time, 'path': chunk_path, 'content': rc.content}
 
     def getStream(self, stream, duration=float('inf'), interval=1):
-        """Yields all chunks from given stream."""
+        """Yield all chunks from given stream."""
         # TODO: add drm support (rightsmanager.asmx) ?
         # TODO: detect best quality
         # todo: ability to choose quality
@@ -138,7 +138,7 @@ class Core(object):
             yield self.getChunk(stream_url, chunk[0])
 
     def getStreams(self, streams, duration=float('inf'), interval=0.5):
-        """Retrieves streams (first audio and first video)"""
+        """Retrieve streams (first audio and first video)."""
         # interval 1 / number of streams (1/1, 1/2)
         # TODO: multithread
         # TODO: write offline manifest
