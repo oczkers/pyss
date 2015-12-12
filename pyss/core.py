@@ -137,8 +137,9 @@ class Core(object):
             time.sleep(interval)
             yield self.getChunk(stream_url, chunk[0])
 
-    def getStreams(self, streams, duration=float('inf'), interval=1):
+    def getStreams(self, streams, duration=float('inf'), interval=0.5):
         """Retrieves streams (first audio and first video)"""
+        # interval 1 / number of streams (1/1, 1/2)
         # TODO: multithread
         # TODO: write offline manifest
         # TODO: detect best quality
